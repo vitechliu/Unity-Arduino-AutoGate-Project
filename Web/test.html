@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+    <title>test</title>
+  </head>
+  <body>
+      
+      <button id="status">查看门的状态</button>
+      <p id="doorS"></p>
+      <br>
+      <input id="usrName" type="text" maxlength="20" placeholder="请输入姓名缩写">
+      <input id="door" type="number" placeholder="请输入门的编号">
+      <button id="open">开门</button>
+      <button id="close">关门</button>
+      <p id="openS"></p>
+    </body>
+    <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+        var $nA = [];
+        
+        $nA['lzr']="刘子锐";
+$nA['pyc']="潘宇超";
+$nA['lmx']="刘明绪";
+$nA['ymx']="岳孟雄";
+$nA['yt']="杨泰";
+$nA['wtz']="王庭舟";
+        $("#status").click(function(){
+            var str="";
+            $.post('doorStatus.php',{token:"123456"},function(data){
+                var doorStatus = data['doorStatus'];
+                for(var dp in doorStatus) {
+                    if (parseInt(doorStatus[dp]['status'])>0) str += dp+"号门于"+doorStatus[dp]['time']+"被"+doorStatus[dp]['lastOperator']+"打开";
+                    else {
+                        if(doorStatus[dp]['lastOperator']!=null) str += dp+"号门于"+doorStatus[dp]['time']+"被"+doorStatus[dp]['lastOperator']+"关闭";
+                        else str+= dp+"号门处于关闭状态";
+                    }
+                    str+="<br>";
+                }
+                $("#doorS").html(str);
+            });
+        });
+        $("#open").click(function(){
+            var nm = $("#usrName").val();
+            var doorNum = $("#door").val();
+            $.post('sendMessage.php',{token:"123456",name:nm,door:doorNum,operation:1},function(data){      
+                var str="";
+                if (data['status']) str="开门成功!";
+                else str="开门失败"+data['errorMsg'];
+                $("#openS").html(str);
+            });
+        });
+        $("#close").click(function(){
+            var nm = $("#usrName").val();
+            var doorNum = $("#door").val();
+            $.post('sendMessage.php',{token:"123456",name:nm,door:doorNum,operation:0},function(data){      
+                var str="";
+                if (data['status']) str="关门成功!";
+                else str="关门失败"+data['errorMsg'];
+                $("#openS").html(str);
+            });
+        });
+    </script>
+</html>
