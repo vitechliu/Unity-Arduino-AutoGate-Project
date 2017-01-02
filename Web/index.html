@@ -1,0 +1,275 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>电子锁客户控制系统</title>
+      <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="assets/css/materialize.min.css">
+
+  <!-- Compiled and minified JavaScript -->
+  <style>
+      html,body{
+          width:100%;
+          height:100%;
+      }
+      * {
+          font-family: "Microsoft YaHei","微软雅黑",微软雅黑;
+          color:white;
+          
+      }
+      #wrapper {
+          margin:0;
+          padding:0;
+          width:100%;
+          background-color:#009999;
+          text-align:center;
+      }
+      .box {
+          position:relative;
+          margin:20px;
+          border:5px solid rgba(255,255,255,.5);
+          border-radius:55px;
+          box-shadow: 0 0 8px rgba(255,255,255,.5);
+          background-color:rgba(0,0,0,.3);
+      }
+      .lock,.lockBottom {
+          position:absolute;
+          top:0;
+          left:0;
+      }
+      .center{
+          text-align:center;
+      }
+      img.insert {
+          width:100%;
+          height:100%;
+      }
+      img.insert2 {
+          
+          margin-top:15%;
+          width:70%;
+          height:70%;
+      }
+      .hover {
+          float:left;
+          margin:10px;
+          border-radius:35px;
+          width:70px;
+          height:70px;
+          transition:all 1s;
+          background-color:rgba(0,0,0,.3);
+      }
+      .hover:hover {
+          background-color:rgba(255,255,255,.3);
+      }
+      nav {
+          padding-left:10px;
+          background-color:rgba(0,0,0,.6);
+      }
+      .boxDoor {
+          font-size:2em;
+          position: absolute;
+          top:5%;
+          left:5%;
+      }
+      p {
+          font-size:2em;
+      }
+      #card {
+          position:absolute;
+          display:none;
+      }
+      </style>
+  </head>
+  <body>
+        <div class="navbar-fixed">
+      <nav>
+    <div class="nav-wrapper">
+      <a href="#" class="brand-logo">电子锁控制系统</a>
+    </div>
+  </nav></div>
+      <div id="card" class="card blue-grey darken-1">
+            <div class="card-content white-text">
+             <div class="input-field col s6">
+          <input placeholder="输入姓名缩写" id="usrName" type="text">
+          <label for="usrName">姓名缩写</label>
+        </div>
+            </div>
+            <div class="card-action">
+              <a id="closeCard" href="#">关闭</a>
+            </div>
+          </div>
+      
+      
+      <div id="wrapper">
+        <div class="container center">
+            <br><br>
+            <div class="hover refresh"><img class="insert2" src="assets/img/refresh.png"></div>
+            <div class="hover info"><img class="insert2" src="assets/img/info.png"></div>
+            <div class="hover user"><img class="insert2" src="assets/img/user.png"></div>
+            <p id="statusAll">加载中</p>
+            <br>
+            <div class="box" id="box1">
+                <div class="boxDoor">1号门</div>
+                <div class="lock"><img class="insert" src="assets/img/lock.png"></div>
+                <div class="lockBottom"><img class="insert" src="assets/img/lockBottom.png"></div>
+            </div>
+            <div class="box" id="box2">
+                <div class="boxDoor">2号门</div>
+                <div class="lock"><img class="insert" src="assets/img/lock.png"></div>
+                <div class="lockBottom"><img class="insert" src="assets/img/lockBottom.png"></div>
+            </div>
+            <p ><strong>历史记录</strong></p>
+            <p id="historyS"></p>
+          </div>
+          
+     
+      </div> 
+
+    </body>
+    <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+    <script src="assets/js/materialize.min.js"></script>
+    <script>
+     ready = false;
+
+function res(e) {
+  a = $(".container").width();
+  a -= 40;
+  $(".lock,.lockBottom").css("width", a + "px");
+  $(".lock,.lockBottom").css("height", a + "px");
+  $(".box").css("height", a + "px");
+}
+doorStat = [];
+var $nA = [];
+
+$nA['lzr'] = "刘子锐";
+$nA['pyc'] = "潘宇超";
+$nA['lmx'] = "刘明绪";
+$nA['ymx'] = "岳孟雄";
+$nA['yt'] = "杨泰";
+$nA['wtz'] = "王庭舟";
+$nA['init'] = "管理员";
+operation = [];
+operation[0] = "关闭";
+operation[1] = "打开";
+
+function setDoor(door, open) {
+  if (open==1) $("#box" + door).find(".lock").css("top", "-" + a * 0.13 + "px");
+  else $("#box" + door).find(".lock").css("top", "0px");
+}
+function animateDoor(door, open) {
+  if (open==1) $("#box" + door).find(".lock").animate({
+    top: "-" + a * 0.13 + "px"
+  });
+  else $("#box" + door).find(".lock").animate({
+    top: "0px"
+  });
+}
+function init() {
+  $.post('doorStatus.php', {
+    token: "123456"
+  },
+  function(data) {
+    var doorStatus = data['doorStatus'];
+    doorStat[1] = doorStatus[1]['status'];
+    doorStat[2] = doorStatus[2]['status'];
+    setDoor(1, doorStat[1]);
+    setDoor(2, doorStat[2]);
+    ready = true;
+    $("#statusAll").text("准备就绪");
+    Materialize.toast("数据已同步", 4000);
+  });
+}
+$(function() {
+  res();
+  $(window).bind("resize", res);
+
+  init();
+  $(".refresh").bind("click", init);
+
+  $(".box").click(function() {
+    if ($("#usrName").val()=="") {
+        Materialize.toast("请输入姓名缩写!", 4000);
+        $("#card").show(1000); 
+        return;
+    }
+    var boxid = $(this).attr("id").charAt(3);
+      console.log(boxid);
+    if (String(doorStat[boxid]) == "0") {
+        openDoor(boxid);
+        //animateDoor(boxid, 1);
+    }
+    else {
+        closeDoor(boxid);
+        //animateDoor(boxid, 0);
+    }
+  });
+
+  $(".info").click(function() {
+    var str = "";
+    $.post('historyStatus.php', {
+      token: "123456",
+      checked: 1
+    },
+    function(data) {
+      var historyStatus = data['historyStatus'];
+      for (var idh in historyStatus) if (historyStatus[idh]['door'] != 4) {
+        var hp = historyStatus[idh];
+        str += hp['check1'] == 1 ? "[已同步]": "[未同步]";
+        str += hp['door'] + "号门于" + hp['time'] + "被" + hp['operator'] + operation[hp['operation']];
+        str += "<br>";
+      }
+      $("#historyS").html(str);
+    });
+  });
+  $(".user").click(function(){
+     $("#card").show(1000); 
+  });
+  $("#closeCard").click(function(){
+     $("#card").hide(1000); 
+  });
+function openDoor(doorNum) {
+    var nm = $("#usrName").val();
+    //var doorNum = $("#door").val();
+    $.post('sendMessage.php', {
+      token: "123456",
+      name: nm,
+      door: doorNum,
+      operation: 1
+    },
+    function(data) {
+      var str = "";
+      console.log(data);
+      if (data['status']) {
+          str = "开门成功!";
+          animateDoor(doorNum, 1);
+          doorStat[doorNum]=1;
+      }
+      else str = "开门失败" + data['errorMsg'];
+      Materialize.toast(str, 4000);
+    });
+  }
+function closeDoor(doorNum) {
+    var nm = $("#usrName").val();
+    //var doorNum = $("#door").val();
+    $.post('sendMessage.php', {
+      token: "123456",
+      name: nm,
+      door: doorNum,
+      operation: 0
+    },
+    function(data) {
+      console.log(data);
+      var str = "";
+      if (data['status']) {
+          str = "关门成功!";
+          animateDoor(doorNum, 0);
+          doorStat[doorNum]=0;
+      }
+      else str = "关门失败" + data['errorMsg'];
+      Materialize.toast(str, 4000);
+    });
+  };
+});
+    </script>
+</html>

@@ -8,12 +8,19 @@
       
       <button id="status">查看门的状态</button>
       <p id="doorS"></p>
+      <button id="history">查看历史记录</button>
+      <p id="historyS"></p>
       <br>
       <input id="usrName" type="text" maxlength="20" placeholder="请输入姓名缩写">
       <input id="door" type="number" placeholder="请输入门的编号">
       <button id="open">开门</button>
       <button id="close">关门</button>
       <p id="openS"></p>
+      
+      <form action="historyStatus.php" method="post">
+          <input type="hidden" value="123456" name="token">
+          <input type="submit" value="submit">
+      </form>
     </body>
     <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
     <script>
@@ -25,6 +32,10 @@ $nA['lmx']="刘明绪";
 $nA['ymx']="岳孟雄";
 $nA['yt']="杨泰";
 $nA['wtz']="王庭舟";
+    $nA['init']="管理员";    
+        operation = [];
+        operation[0] = "关闭";
+        operation[1] = "打开";
         $("#status").click(function(){
             var str="";
             $.post('doorStatus.php',{token:"123456"},function(data){
@@ -40,11 +51,26 @@ $nA['wtz']="王庭舟";
                 $("#doorS").html(str);
             });
         });
+        $("#history").click(function(){
+            var str="";
+            $.post('historyStatus.php',{token:"123456",checked:1},function(data){
+                var historyStatus = data['historyStatus'];
+                for(var idh in historyStatus) 
+                    if (historyStatus[idh]['door']!=4) {
+                        var hp = historyStatus[idh];
+                        str+= hp['check1']==1 ? "[已同步]" : "[未同步]";
+                        str += hp['door']+"号门于"+hp['time']+"被"+hp['operator']+operation[hp['operation']];
+                        str+="<br>";
+                    }
+                $("#historyS").html(str);
+            });
+        });
         $("#open").click(function(){
             var nm = $("#usrName").val();
             var doorNum = $("#door").val();
             $.post('sendMessage.php',{token:"123456",name:nm,door:doorNum,operation:1},function(data){      
                 var str="";
+                console.log(data);
                 if (data['status']) str="开门成功!";
                 else str="开门失败"+data['errorMsg'];
                 $("#openS").html(str);
@@ -53,7 +79,7 @@ $nA['wtz']="王庭舟";
         $("#close").click(function(){
             var nm = $("#usrName").val();
             var doorNum = $("#door").val();
-            $.post('sendMessage.php',{token:"123456",name:nm,door:doorNum,operation:0},function(data){      
+            $.post('sendMessage.php',{token:"123456",name:nm,door:doorNum,operation:0},function(data){     console.log(data);
                 var str="";
                 if (data['status']) str="关门成功!";
                 else str="关门失败"+data['errorMsg'];

@@ -20,7 +20,7 @@ $sql = "SELECT * FROM arduino ";
 $res = $pdo->query($sql);
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$json['status'] = true;
-	$json['doorStatus'][$row['door']] = array('status' => $row['status'], 'lastOperator' => $row['lastOperator'], 'lastOperation' => $row['lastOperation'], 'time' => $row['time']);
+	$json['doorStatus'][(int)$row['door']] = array('status' => $row['status'], 'lastOperator' => $row['lastOperator'], 'lastOperation' => $row['lastOperation'], 'time' => $row['time']);
 }
 echo json_encode($json);
 ?>
